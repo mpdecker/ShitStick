@@ -1,8 +1,10 @@
 import 'dart:math';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:workmanager/workmanager.dart';
 import 'koans.dart';
 
 final _plugin = FlutterLocalNotificationsPlugin();
@@ -11,6 +13,16 @@ final _rng = Random();
 const _lastIndexKey = 'last_koan_index';
 const _channelId = 'stick';
 const _channelName = 'The Stick';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((taskName, inputData) async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await initNotifications();
+    await scheduleNext();
+    return true;
+  });
+}
 
 Future<void> initNotifications() async {
   tz.initializeTimeZones();
@@ -81,6 +93,13 @@ Future<String> scheduleNext() async {
     androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
+  );
+
+  await Workmanager().cancelByUniqueName('koan-chain');
+  await Workmanager().registerOneOffTask(
+    'koan-chain',
+    'scheduleNext',
+    initialDelay: Duration(hours: delayHours),
   );
 
   return koans[nextIndex];
