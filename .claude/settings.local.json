@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter *)",
+      "Bash(dart --version)",
+      "Bash(New-Item -ItemType Directory -Force \"C:\\\\Development\\\\Shit-Covered-Stick\\\\docs\\\\superpowers\\\\plans\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Host \"done\")",
+      "PowerShell(New-Item *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "Skill(superpowers:writing-skills)"
+    ]
+  }
+}
