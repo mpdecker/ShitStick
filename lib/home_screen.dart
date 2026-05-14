@@ -8,20 +8,47 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _koan;
   bool _ready = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _onResume();
+    }
+  }
+
+  Future<void> _onResume() async {
+    await ensureKoanChain();
+    final current = await getCurrentKoan();
+    if (!mounted) return;
+    if (current != null && current != _koan) {
+      setState(() => _koan = current);
+    }
+  }
+
   Future<void> _load() async {
+    await requestPermissions();
+    await ensureKoanChain();
+
     String? current = await getCurrentKoan();
     current ??= await scheduleNext();
 
+    if (!mounted) return;
     setState(() {
       _koan = current;
       _ready = true;

@@ -7,7 +7,7 @@ import 'home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initNotifications();
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  await Workmanager().initialize(callbackDispatcher);
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
