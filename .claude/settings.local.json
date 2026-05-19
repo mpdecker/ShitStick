@@ -10,7 +10,8 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git commit *)",
-      "Skill(superpowers:writing-skills)"
+      "Skill(superpowers:writing-skills)",
+      "WebFetch(domain:api.anthropic.com)"
     ]
   }
 }
