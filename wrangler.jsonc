@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "shit-covered-stick",
+  "compatibility_date": "2026-09-12",
+  "observability": { "enabled": true },
+  "assets": { "directory": "build/web" },
+  "routes": [
+    { "pattern": "koan.drownedwoods.com", "custom_domain": true }
+  ]
+}
