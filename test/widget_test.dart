@@ -12,7 +12,7 @@ void main() {
   const MethodChannel notificationsChannel =
       MethodChannel('dexterous.com/flutter/local_notifications');
 
-  testWidgets('renders koan text on black screen', (WidgetTester tester) async {
+  testWidgets('native stays a black screen — the koan lives only in the notification', (WidgetTester tester) async {
     IOSFlutterLocalNotificationsPlugin.registerWith();
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -58,7 +58,14 @@ void main() {
     await initNotifications();
     await tester.pumpWidget(const App());
     await tester.pumpAndSettle();
-    expect(find.text('Wu.'), findsOneWidget);
+    // kIsWeb is a compile-time constant fixed to false under `flutter test`
+    // (a VM target, not web), so this suite can only exercise the native
+    // path — home_screen.dart's own web/koan-on-screen branch needs
+    // `flutter test --platform chrome` to ever see kIsWeb true. What's
+    // provable here, and what actually matters for native, is the thing the
+    // fix this test used to check for broke: the screen stays black and the
+    // koan text never lands on it, on this or any other native platform.
+    expect(find.text('Wu.'), findsNothing);
 
     debugDefaultTargetPlatformOverride = null;
   });
