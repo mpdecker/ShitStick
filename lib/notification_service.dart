@@ -41,6 +41,8 @@ void callbackDispatcher() {
 Future<void> initNotifications() async {
   tzdata.initializeTimeZones();
 
+  if (kIsWeb) return;
+
   const android = AndroidInitializationSettings('@mipmap/ic_launcher');
   const ios = DarwinInitializationSettings(
     requestAlertPermission: true,
@@ -54,6 +56,8 @@ Future<void> initNotifications() async {
 }
 
 Future<void> requestPermissions() async {
+  if (kIsWeb) return;
+
   await _plugin
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
@@ -149,6 +153,14 @@ Future<void> _rescheduleExistingKoan(int nextDeliveryEpochMs) async {
 /// If the next delivery time has passed and no pending koan notification exists,
 /// advance the chain (Workmanager likely did not run).
 Future<void> ensureKoanChain() async {
+  if (kIsWeb) {
+    // No background scheduler on web — just make sure a koan is picked so
+    // the in-app screen has something to show.
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('current_koan') == null) await scheduleNext();
+    return;
+  }
+
   if (!await _notificationsPermittedForChain()) return;
 
   final pending = await _plugin.pendingNotificationRequests();
@@ -216,26 +228,28 @@ Future<String> scheduleNext({bool promptForExactAlarms = true}) async {
     scheduledTime.millisecondsSinceEpoch,
   );
 
-  final androidMode =
-      await _resolveAndroidScheduleMode(promptForExactAlarms: promptForExactAlarms);
+  if (!kIsWeb) {
+    final androidMode = await _resolveAndroidScheduleMode(
+        promptForExactAlarms: promptForExactAlarms);
 
-  await _plugin.zonedSchedule(
-    _koanNotificationId,
-    null,
-    koans[nextIndex],
-    scheduledTime,
-    _koanNotificationDetails(koans[nextIndex]),
-    androidScheduleMode: androidMode,
-    uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-  );
+    await _plugin.zonedSchedule(
+      _koanNotificationId,
+      null,
+      koans[nextIndex],
+      scheduledTime,
+      _koanNotificationDetails(koans[nextIndex]),
+      androidScheduleMode: androidMode,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
 
-  await Workmanager().cancelByUniqueName('koan-chain');
-  await Workmanager().registerOneOffTask(
-    'koan-chain',
-    'scheduleNext',
-    initialDelay: Duration(hours: delayHours),
-  );
+    await Workmanager().cancelByUniqueName('koan-chain');
+    await Workmanager().registerOneOffTask(
+      'koan-chain',
+      'scheduleNext',
+      initialDelay: Duration(hours: delayHours),
+    );
+  }
 
   return koans[nextIndex];
 }

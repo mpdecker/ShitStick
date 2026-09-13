@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:workmanager/workmanager.dart';
@@ -7,7 +8,12 @@ import 'home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initNotifications();
-  await Workmanager().initialize(callbackDispatcher);
+  // Workmanager (background task scheduling) has no web implementation —
+  // the web build shows the current koan in-app instead of relying on a
+  // scheduled notification chain.
+  if (!kIsWeb) {
+    await Workmanager().initialize(callbackDispatcher);
+  }
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
