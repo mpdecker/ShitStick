@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shit_covered_stick/home_screen.dart';
 import 'package:shit_covered_stick/main.dart';
 import 'package:shit_covered_stick/notification_service.dart';
 
@@ -58,7 +60,11 @@ void main() {
     await initNotifications();
     await tester.pumpWidget(const App());
     await tester.pumpAndSettle();
-    expect(find.text('Wu.'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      Colors.black,
+    );
 
     debugDefaultTargetPlatformOverride = null;
   });
