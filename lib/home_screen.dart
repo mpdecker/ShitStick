@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'notification_service.dart';
+
+const _kofiUrl = 'https://ko-fi.com/matthieudecker';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,15 +59,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Text(
-            _koan!,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 20, height: 1.5),
+      body: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                _koan!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 20, height: 1.5),
+              ),
+            ),
           ),
-        ),
+          // Quiet, not a settings screen — this app doesn't have one and
+          // shouldn't grow one. Just a way out for anyone who wants it,
+          // small enough not to compete with the koan.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 24,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => launchUrl(Uri.parse(_kofiUrl), webOnlyWindowName: '_blank'),
+                child: Text(
+                  'support',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.25), fontSize: 11, letterSpacing: 0.5),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

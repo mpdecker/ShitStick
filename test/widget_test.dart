@@ -14,7 +14,7 @@ void main() {
   const MethodChannel notificationsChannel =
       MethodChannel('dexterous.com/flutter/local_notifications');
 
-  testWidgets('renders koan text on black screen', (WidgetTester tester) async {
+  testWidgets('native stays a black screen — the koan lives only in the notification', (WidgetTester tester) async {
     IOSFlutterLocalNotificationsPlugin.registerWith();
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -65,6 +65,7 @@ void main() {
       tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
       Colors.black,
     );
+    expect(find.text('Wu.'), findsNothing);
 
     debugDefaultTargetPlatformOverride = null;
   });
