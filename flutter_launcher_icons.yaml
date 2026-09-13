@@ -1,0 +1,14 @@
+flutter_launcher_icons:
+  image_path: "assets/branding/icon_1024.png"
+  android: "ic_launcher"
+  ios: true
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  adaptive_icon_background: "#eadebc"
+  adaptive_icon_foreground: "assets/branding/enso_adaptive_foreground_1024.png"
+  adaptive_icon_monochrome: "assets/branding/enso_adaptive_foreground_1024.png"
+  web:
+    generate: true
+    image_path: "assets/branding/icon_1024.png"
+    background_color: "#eadebc"
+    theme_color: "#eadebc"
