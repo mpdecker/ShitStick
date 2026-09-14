@@ -150,14 +150,24 @@ Future<void> _rescheduleExistingKoan(int nextDeliveryEpochMs) async {
   );
 }
 
+/// Web has no background scheduler to advance the chain while the tab is
+/// closed, so each launch re-checks the persisted delivery time itself and
+/// advances past it here — otherwise the first koan ever picked would be
+/// the only one the web app ever shows.
+Future<void> ensureKoanChainWeb() async {
+  final prefs = await SharedPreferences.getInstance();
+  final nextMs = prefs.getInt(_nextDeliveryEpochKey);
+  final now = DateTime.now().millisecondsSinceEpoch;
+  if (prefs.getString('current_koan') == null || nextMs == null || now >= nextMs) {
+    await scheduleNext();
+  }
+}
+
 /// If the next delivery time has passed and no pending koan notification exists,
 /// advance the chain (Workmanager likely did not run).
 Future<void> ensureKoanChain() async {
   if (kIsWeb) {
-    // No background scheduler on web — just make sure a koan is picked so
-    // the in-app screen has something to show.
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('current_koan') == null) await scheduleNext();
+    await ensureKoanChainWeb();
     return;
   }
 
