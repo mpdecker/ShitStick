@@ -37,7 +37,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _init() async {
     await requestPermissions();
-    await ensureKoanChain();
+    // freshVisit: a web open always rolls a new koan — the screen is the
+    // only delivery channel there, so the gap must not pin one koan across
+    // consecutive visits. Native ignores the flag (the notification chain
+    // owns delivery).
+    await ensureKoanChain(freshVisit: true);
     final current = await getCurrentKoan();
     if (current == null) await scheduleNext();
     await _loadKoan();

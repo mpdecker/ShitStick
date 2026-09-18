@@ -154,20 +154,32 @@ Future<void> _rescheduleExistingKoan(int nextDeliveryEpochMs) async {
 /// closed, so each launch re-checks the persisted delivery time itself and
 /// advances past it here — otherwise the first koan ever picked would be
 /// the only one the web app ever shows.
-Future<void> ensureKoanChainWeb() async {
+///
+/// [freshVisit] marks a cold open of the app rather than a tab refocus.
+/// The screen is web's only delivery channel and delivery gaps run up to
+/// twenty days, so every fresh visit rolls a new koan instead of waiting
+/// out the gap — otherwise one picked koan would greet every open.
+Future<void> ensureKoanChainWeb({bool freshVisit = false}) async {
   final prefs = await SharedPreferences.getInstance();
   final nextMs = prefs.getInt(_nextDeliveryEpochKey);
   final now = DateTime.now().millisecondsSinceEpoch;
-  if (prefs.getString('current_koan') == null || nextMs == null || now >= nextMs) {
+  if (freshVisit ||
+      prefs.getString('current_koan') == null ||
+      nextMs == null ||
+      now >= nextMs) {
     await scheduleNext();
   }
 }
 
 /// If the next delivery time has passed and no pending koan notification exists,
 /// advance the chain (Workmanager likely did not run).
-Future<void> ensureKoanChain() async {
+///
+/// [freshVisit] only matters on web (see [ensureKoanChainWeb]); on native the
+/// koan lives in the notification chain, and opening the app must not re-roll
+/// what has already been scheduled.
+Future<void> ensureKoanChain({bool freshVisit = false}) async {
   if (kIsWeb) {
-    await ensureKoanChainWeb();
+    await ensureKoanChainWeb(freshVisit: freshVisit);
     return;
   }
 
