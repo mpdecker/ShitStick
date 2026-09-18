@@ -105,5 +105,34 @@ void main() {
       final nextMs = prefs.getInt('next_delivery_epoch_ms');
       expect(nextMs, greaterThan(past.millisecondsSinceEpoch));
     });
+
+    test('re-rolls on a fresh visit even while the delivery time is still in the future', () async {
+      final future = DateTime.now().add(const Duration(days: 2));
+      SharedPreferences.setMockInitialValues({
+        'current_koan': 'Ordinary mind is the way.',
+        'next_delivery_epoch_ms': future.millisecondsSinceEpoch,
+      });
+
+      await ensureKoanChainWeb(freshVisit: true);
+
+      expect(await getCurrentKoan(), isNot(equals('Ordinary mind is the way.')));
+
+      final prefs = await SharedPreferences.getInstance();
+      final nextMs = prefs.getInt('next_delivery_epoch_ms');
+      expect(nextMs, greaterThan(DateTime.now().millisecondsSinceEpoch));
+    });
+
+    test('never shows the same koan on two consecutive fresh visits', () async {
+      SharedPreferences.setMockInitialValues({});
+      await ensureKoanChainWeb(freshVisit: true);
+
+      var previous = await getCurrentKoan();
+      for (var i = 0; i < 10; i++) {
+        await ensureKoanChainWeb(freshVisit: true);
+        final current = await getCurrentKoan();
+        expect(current, isNot(equals(previous)));
+        previous = current;
+      }
+    });
   });
 }
